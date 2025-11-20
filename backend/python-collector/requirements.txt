@@ -1,4 +1,3 @@
-# Para requisições HTTP (coleta de dados de clima)
-requests
-# Para comunicação com RabbitMQ (produtor)
-pika
+requests          # Para a API de Clima
+pika              # Para comunicação com RabbitMQ
+schedule          # Para agendamento da coleta periódica
