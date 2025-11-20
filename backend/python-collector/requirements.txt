@@ -1,0 +1,4 @@
+# Para requisições HTTP (coleta de dados de clima)
+requests
+# Para comunicação com RabbitMQ (produtor)
+pika

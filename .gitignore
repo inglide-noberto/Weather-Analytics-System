@@ -1,0 +1,49 @@
+# =========================================================
+# 1. ARQUIVOS DE AMBIENTE E CONFIGURAÇÃO LOCAL
+# =========================================================
+
+.env
+.vscode/
+
+# =========================================================
+# 2. DEPENDÊNCIAS DE PACOTES (Node, Go, Python)
+# =========================================================
+
+# Node.js (Frontend e NestJS API)
+node_modules
+# Logs de npm
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Go (Worker)
+# Diretório onde as dependências Go são armazenadas
+/backend/go-worker/vendor/
+# Arquivos binários gerados pelo Go
+*.exe
+*.o
+*.so
+/backend/go-worker/worker # Nosso binário de saída
+
+# Python (Collector)
+# Diretório de ambientes virtuais
+venv/
+.venv/
+# Arquivos de bytecode Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# =========================================================
+# 3. OUTPUT DE BUILD (Arquivos Gerados)
+# =========================================================
+
+/backend/api-server/dist
+/frontend/dist
+
+# =========================================================
+# 4. ARQUIVOS DO SISTEMA OPERACIONAL
+# =========================================================
+.DS_Store # macOS
+Thumbs.db # Windows

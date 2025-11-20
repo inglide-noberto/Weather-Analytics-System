@@ -1,0 +1,86 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: gdash_weather
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672" 
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+
+  nestjs-api:
+    build:
+      context: ./backend/api-server
+      dockerfile: Dockerfile
+    container_name: nestjs-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+      - rabbitmq
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/gdash_weather
+      API_PORT: 3000
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+
+  go-worker:
+    build:
+      context: ./backend/go-worker
+      dockerfile: Dockerfile
+    container_name: go-worker
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+      - nestjs-api
+    environment:
+      RABBITMQ_URI: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
+      NESTJS_API_URL: ${NESTJS_API_URL}${NESTJS_INGESTION_ENDPOINT}
+
+  python-collector:
+    build:
+      context: ./backend/python-collector
+      dockerfile: Dockerfile
+    container_name: python-collector
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_URI: amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
+      WEATHER_API_KEY: ${WEATHER_API_KEY}
+      CITY_LAT: ${CITY_LAT}
+      CITY_LON: ${CITY_LON}
+      COLLECTION_INTERVAL_HOURS: ${COLLECTION_INTERVAL_HOURS}
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - nestjs-api
+    environment:
+      VITE_API_URL: http://localhost:3000
+
+volumes:
+  mongodb_data:
